@@ -1,0 +1,48 @@
+enfant: Tom
+
+semaine_type:
+  lundi:
+    - activite: Collège
+      debut: "08:00"
+      fin: "17:00"
+      lieu: Collège Victor Hugo
+    - activite: Demi-pension
+  mardi:
+    - activite: Collège
+      debut: "09:00"
+      fin: "16:00"
+    - activite: Demi-pension
+    - activite: Guitare
+      debut: "17:30"
+      fin: "18:15"
+      lieu: École de musique
+  mercredi:
+    - activite: Collège
+      debut: "08:00"
+      fin: "12:00"
+    - activite: Foot
+      debut: "14:00"
+      fin: "16:00"
+      lieu: Stade des Cézeaux
+  jeudi:
+    - activite: Collège
+      debut: "08:00"
+      fin: "17:00"
+    - activite: Demi-pension
+  vendredi:
+    - activite: Collège
+      debut: "08:00"
+      fin: "16:00"
+    - activite: Demi-pension
+  samedi:
+    - activite: Match de foot
+      debut: "10:00"
+      lieu: variable, voir le planning du club
+  dimanche: []
+
+exceptions:
+  - du: 2026-10-17
+    au: 2026-11-02
+    motif: vacances de la Toussaint
+    remplace: true
+    activites: []
