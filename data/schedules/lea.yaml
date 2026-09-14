@@ -1,0 +1,59 @@
+# Emploi du temps type de Léa. Modifie librement : le fichier est relu à chaque
+# question, pas besoin de redémarrer Bleuet.
+enfant: Léa
+
+semaine_type:
+  lundi:
+    - activite: École
+      debut: "08:30"
+      fin: "16:30"
+      lieu: École Jean Moulin
+    - activite: Cantine
+      note: inscrite
+    - activite: Judo
+      debut: "17:30"
+      fin: "18:30"
+      lieu: Dojo municipal
+  mardi:
+    - activite: École
+      debut: "08:30"
+      fin: "16:30"
+      lieu: École Jean Moulin
+    - activite: Cantine
+  mercredi:
+    - activite: École
+      debut: "08:30"
+      fin: "11:30"
+    - activite: Centre de loisirs
+      debut: "13:30"
+      fin: "17:00"
+  jeudi:
+    - activite: École
+      debut: "08:30"
+      fin: "16:30"
+    - activite: Cantine
+    - activite: Piscine avec la classe
+      debut: "14:00"
+      note: prévoir le sac de piscine
+  vendredi:
+    - activite: École
+      debut: "08:30"
+      fin: "16:30"
+    - activite: Cantine
+  samedi: []
+  dimanche: []
+
+exceptions:
+  - du: 2026-10-17
+    au: 2026-11-02
+    motif: vacances de la Toussaint
+    remplace: true
+    activites: []
+  - date: 2026-09-25
+    motif: sortie scolaire
+    remplace: true
+    activites:
+      - activite: Sortie au musée
+        debut: "09:00"
+        fin: "17:00"
+        note: pique-nique à prévoir

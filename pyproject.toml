@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bleuet"
+version = "0.1.0"
+description = "Assistant vocal familial local (wake word -> STT -> Claude -> TTS)"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.40",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "icalendar>=6.0",
+    "requests>=2.31",
+    "numpy>=1.24,<2.3",
+    "sounddevice>=0.4.6",
+    "soundfile>=0.12",
+]
+
+[project.optional-dependencies]
+# Détection du mot de réveil (tourne sur le Pi).
+wakeword = [
+    "openwakeword>=0.6.0",
+    "onnxruntime>=1.17",
+]
+# Transcription locale (tourne sur le PC/serveur, PAS sur un Pi 3).
+stt = [
+    "faster-whisper>=1.0.3",
+]
+# API HTTP pour séparer Pi et serveur.
+server = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "python-multipart>=0.0.9",
+]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+bleuet = "bleuet.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

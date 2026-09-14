@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Bleuet ---
+data/models/*.onnx
+data/models/*.onnx.json
+data/rag.sqlite3
+data/*.wav
