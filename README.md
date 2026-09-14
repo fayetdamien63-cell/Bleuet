@@ -6,6 +6,31 @@ Claude (avec le contexte de la maison) → réponse parlée**.
 MVP développé et testé sur PC (Linux/macOS/Windows), écrit pour être porté
 ensuite sur un Raspberry Pi 3 — voir [`docs/raspberry-pi.md`](docs/raspberry-pi.md).
 
+## Documentation
+
+Deux ensembles de documents coexistent dans ce dépôt, et ils ne décrivent pas la
+même chose :
+
+| Document | Contenu |
+|---|---|
+| **Ce README** | le MVP **tel qu'il est implémenté** : Python de bout en bout, sur PC |
+| [`docs/raspberry-pi.md`](docs/raspberry-pi.md) | points durs du portage du MVP sur Pi 3 |
+| [`docs/wakeword.md`](docs/wakeword.md) | entraîner un mot de réveil français |
+| [1. Challenge de l'architecture](docs/01-challenge-architecture.md) | les 12 façons dont le projet peut échouer, et les parades |
+| [2. Architecture cible](docs/02-architecture.md) | conception satellite/serveur (client Go, Pi 1B+) |
+| [3. Contrat client ↔ serveur](docs/03-protocole.md) | protocole WebSocket, machine à états, format des skills |
+| [4. Plan d'implémentation](docs/04-plan.md) | phases 0 à 6 avec définitions de terminé |
+| [5. Ressources](docs/05-ressources.md) | matériel, clés API, modèles, coûts |
+
+Les documents numérotés 1 à 5 sont une **conception antérieure et plus ambitieuse**
+(satellite Go sur Pi 1B+, protocole WebSocket bidirectionnel, mot de réveil
+« Hey Bleuet », routeur déterministe à deux étages). Le MVP décrit ci-dessous est
+plus modeste et diverge sur plusieurs points : Python partout, Pi 3 visé plutôt
+que Pi 1B+, API HTTP simple plutôt que WebSocket streaming, appel direct à Claude
+plutôt que routeur d'intentions. Leurs analyses restent pertinentes — latence,
+xruns USB, vie privée, périmètre — mais **les deux sont à réconcilier** : voir
+« Limites connues » plus bas.
+
 ## Le pipeline
 
 ```
@@ -171,6 +196,8 @@ lecture de l'agenda ICS, RAG, construction du prompt, configuration.
 - L'agenda est un fichier `.ics` local, pas encore un agenda partagé réel.
 - Pas de reconnaissance du locuteur, pas de multi-utilisateur (hors périmètre).
 - L'assistant ne peut rien modifier : il répond, il n'agit pas.
+- Le MVP et la conception `docs/01`–`docs/05` divergent (langage du client,
+  modèle de Pi, protocole, routage) : un arbitrage reste à faire.
 
 ## Structure
 
