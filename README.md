@@ -8,28 +8,12 @@ ensuite sur un Raspberry Pi 3 — voir [`docs/raspberry-pi.md`](docs/raspberry-p
 
 ## Documentation
 
-Deux ensembles de documents coexistent dans ce dépôt, et ils ne décrivent pas la
-même chose :
-
 | Document | Contenu |
 |---|---|
-| **Ce README** | le MVP **tel qu'il est implémenté** : Python de bout en bout, sur PC |
-| [`docs/raspberry-pi.md`](docs/raspberry-pi.md) | points durs du portage du MVP sur Pi 3 |
-| [`docs/wakeword.md`](docs/wakeword.md) | entraîner un mot de réveil français |
-| [1. Challenge de l'architecture](docs/01-challenge-architecture.md) | les 12 façons dont le projet peut échouer, et les parades |
-| [2. Architecture cible](docs/02-architecture.md) | conception satellite/serveur (client Go, Pi 1B+) |
-| [3. Contrat client ↔ serveur](docs/03-protocole.md) | protocole WebSocket, machine à états, format des skills |
-| [4. Plan d'implémentation](docs/04-plan.md) | phases 0 à 6 avec définitions de terminé |
-| [5. Ressources](docs/05-ressources.md) | matériel, clés API, modèles, coûts |
-
-Les documents numérotés 1 à 5 sont une **conception antérieure et plus ambitieuse**
-(satellite Go sur Pi 1B+, protocole WebSocket bidirectionnel, mot de réveil
-« Hey Bleuet », routeur déterministe à deux étages). Le MVP décrit ci-dessous est
-plus modeste et diverge sur plusieurs points : Python partout, Pi 3 visé plutôt
-que Pi 1B+, API HTTP simple plutôt que WebSocket streaming, appel direct à Claude
-plutôt que routeur d'intentions. Leurs analyses restent pertinentes — latence,
-xruns USB, vie privée, périmètre — mais **les deux sont à réconcilier** : voir
-« Limites connues » plus bas.
+| **Ce README** | le MVP, c'est-à-dire le code réellement présent dans le dépôt |
+| [`docs/wakeword.md`](docs/wakeword.md) | entraîner un mot de réveil français, plus tard |
+| [`docs/raspberry-pi.md`](docs/raspberry-pi.md) | points durs du portage sur Pi 3 |
+| `docs/01`–`docs/05` | conception antérieure (satellite Go sur Pi 1B+, WebSocket), **écartée** — conservée pour ses analyses |
 
 ## Le pipeline
 
@@ -88,11 +72,12 @@ cp .env.example .env
 | Variable | Obligatoire | Pour quoi |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | **oui** | l'appel à Claude (<https://console.anthropic.com>) |
-| `OPENWEATHER_API_KEY` | non | météo réelle ; sans elle, un provider `mock` renvoie des données figées |
-| `BLEUET_LATITUDE` / `BLEUET_LONGITUDE` / `BLEUET_CITY` | non | localisation pour la météo |
+| `BLEUET_CITY` | non | ta commune ; Open-Meteo la géocode tout seul |
+| `BLEUET_LATITUDE` / `BLEUET_LONGITUDE` | non | évite l'appel de géocodage au démarrage |
+| `OPENWEATHER_API_KEY` | non | uniquement si tu préfères OpenWeatherMap à Open-Meteo |
 
-Aucune clé n'est nécessaire pour le STT ni le TTS : faster-whisper et Piper
-tournent en local, hors ligne et gratuitement.
+**Une seule clé est nécessaire, celle de Claude.** La météo passe par Open-Meteo,
+gratuit et sans clé ; faster-whisper et Piper tournent en local, hors ligne.
 
 ## Tester brique par brique
 
@@ -173,6 +158,11 @@ Trois sources, toutes éditables à la main et versionnées :
   L'interface reste ouverte si le besoin évolue.
 - **TTS : Piper appelé en sous-processus** — mêmes commandes sur PC et sur Pi,
   et ça évite de faire dépendre le serveur d'`onnxruntime`.
+- **Météo : Open-Meteo** — gratuit, sans clé, réponse structurée (pas de page à
+  interpréter). OpenWeatherMap reste disponible en changeant une ligne de config.
+- **Un seul flux micro, avec pre-roll** — le wake word et l'enregistrement
+  puisent dans le même flux. Ouvrir un second flux échouerait sur ALSA, et le
+  tampon d'une seconde évite de perdre le premier mot de chaque question.
 - **Pas d'historique de conversation** — chaque question est indépendante.
   Simple, prévisible, et la partie stable du prompt est mise en cache côté API.
 - **Modèle : `claude-opus-5` avec `effort: low`** — la latence prime pour une
@@ -191,13 +181,12 @@ lecture de l'agenda ICS, RAG, construction du prompt, configuration.
 
 - La fin d'enregistrement se fait sur un simple seuil RMS, pas un vrai VAD :
   à revoir si la maison est bruyante (webrtcvad / silero-vad).
-- Le mot de réveil est `hey_jarvis` (anglais) tant que le modèle français
-  « Dis Bleuet » n'est pas entraîné — voir [`docs/wakeword.md`](docs/wakeword.md).
+- Le mot de réveil est `hey_jarvis` (anglais), modèle standard de la
+  bibliothèque : c'est un choix assumé pour démarrer vite. Le modèle français
+  « Dis Bleuet » viendra ensuite — voir [`docs/wakeword.md`](docs/wakeword.md).
 - L'agenda est un fichier `.ics` local, pas encore un agenda partagé réel.
 - Pas de reconnaissance du locuteur, pas de multi-utilisateur (hors périmètre).
 - L'assistant ne peut rien modifier : il répond, il n'agit pas.
-- Le MVP et la conception `docs/01`–`docs/05` divergent (langage du client,
-  modèle de Pi, protocole, routage) : un arbitrage reste à faire.
 
 ## Structure
 

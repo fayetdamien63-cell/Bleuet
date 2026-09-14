@@ -12,6 +12,9 @@ audio:
   silence_duration: 1.2
   min_duration: 0.8
   silence_threshold: 0.012    # RMS normalisé ; à ajuster selon le micro
+  # Audio conservé AVANT la détection du mot de réveil : sans lui, le
+  # premier mot de la question est systématiquement perdu.
+  preroll_duration: 1.0
 
 wakeword:
   enabled: true
@@ -53,7 +56,7 @@ rag:
   chunk_chars: 700
 
 context:
-  weather_provider: mock      # mock | openweathermap
+  weather_provider: openmeteo # openmeteo (gratuit, sans clé) | openweathermap | mock
   calendar_provider: ics      # ics | mock
   calendar_path: data/calendar/famille.ics
   schedules_dir: data/schedules

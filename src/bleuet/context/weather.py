@@ -1,4 +1,8 @@
-"""Météo du jour : provider mock (par défaut) ou OpenWeatherMap."""
+"""Météo du jour.
+
+Trois providers : `openmeteo` (défaut, gratuit et sans clé), `openweathermap`
+(nécessite une clé) et `mock` (données figées, pour développer hors ligne).
+"""
 
 from __future__ import annotations
 
@@ -108,9 +112,24 @@ class OpenWeatherMapProvider(WeatherProvider):
 
 def build_weather_provider(cfg) -> WeatherProvider:
     provider = os.environ.get("BLEUET_WEATHER_PROVIDER") or cfg.get(
-        "context.weather_provider", "mock"
+        "context.weather_provider", "openmeteo"
     )
     city = os.environ.get("BLEUET_CITY", "Clermont-Ferrand")
+    latitude = os.environ.get("BLEUET_LATITUDE")
+    longitude = os.environ.get("BLEUET_LONGITUDE")
+
+    if provider == "openmeteo":
+        from .open_meteo import OpenMeteoProvider
+
+        if latitude and longitude:
+            return OpenMeteoProvider(float(latitude), float(longitude), city)
+        # Pas de coordonnées : on les déduit du nom de la ville, une fois.
+        resolved = OpenMeteoProvider.from_city(city)
+        if resolved is not None:
+            return resolved
+        log.warning("géocodage impossible : retour au provider mock")
+        return MockWeatherProvider(city)
+
     if provider == "openweathermap":
         api_key = os.environ.get("OPENWEATHER_API_KEY", "").strip()
         if not api_key:
@@ -118,8 +137,9 @@ def build_weather_provider(cfg) -> WeatherProvider:
             return MockWeatherProvider(city)
         return OpenWeatherMapProvider(
             api_key=api_key,
-            latitude=float(os.environ.get("BLEUET_LATITUDE", 45.7772)),
-            longitude=float(os.environ.get("BLEUET_LONGITUDE", 3.0870)),
+            latitude=float(latitude or 45.7772),
+            longitude=float(longitude or 3.0870),
             city=city,
         )
+
     return MockWeatherProvider(city)

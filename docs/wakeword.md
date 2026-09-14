@@ -1,5 +1,9 @@
 # Mot de réveil « Dis Bleuet »
 
+**Pour le MVP, on reste sur `hey_jarvis`**, un modèle standard de la bibliothèque :
+il fonctionne immédiatement, sans entraînement, et permet de valider le pipeline
+tout de suite. Ce document décrit l'étape d'après.
+
 openWakeWord fournit des modèles pré-entraînés en anglais uniquement
 (`hey_jarvis`, `alexa`, `hey_mycroft`, `hey_rhasspy`…). Pour un mot de réveil
 français il faut entraîner son propre modèle — c'est prévu par le projet et ça
@@ -41,9 +45,16 @@ quelques centaines de kilo-octets qui tourne sans peine sur un Pi 3.
   `wakeword.vad_threshold: 0.5` ajoute un filtre de détection de voix, au prix
   d'un peu de CPU.
 
-## En attendant
+## Autres modèles standards
 
-Le projet démarre avec `pretrained_model: hey_jarvis`, qui fonctionne
-immédiatement après `bleuet download-models`. Le code charge indifféremment un
-modèle pré-entraîné ou un `.onnx` maison : basculer se résume à une ligne de
-config, aucune modification de code.
+Si « hey jarvis » ne te convient pas à l'oral, la bibliothèque en fournit
+d'autres, tout aussi immédiats : `alexa`, `hey_mycroft`, `hey_rhasspy`. Une
+ligne dans `config/config.yaml` suffit :
+
+```yaml
+wakeword:
+  pretrained_model: hey_mycroft
+```
+
+Le code charge indifféremment un modèle pré-entraîné ou un `.onnx` maison :
+basculer vers « Dis Bleuet » le jour venu ne demandera aucune modification de code.

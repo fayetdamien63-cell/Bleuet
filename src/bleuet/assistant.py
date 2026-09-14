@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 
-from .audio.capture import AudioConfig, record_until_silence, stream_chunks
+from .audio.capture import AudioConfig, MicStream
 from .config import Config
 from .logging_setup import get_logger
 from .orchestrator.pipeline import Orchestrator
@@ -31,9 +31,9 @@ class Assistant:
         self.transcriber.warmup()
         log.info("prêt.")
 
-    def handle_utterance(self) -> str | None:
+    def handle_utterance(self, mic: MicStream) -> str | None:
         """Une interaction : enregistre, transcrit, interroge Claude, parle."""
-        samples = record_until_silence(self.audio)
+        samples = mic.record_until_silence()
         transcription = self.transcriber.transcribe(samples, self.audio.sample_rate)
         if not transcription.text:
             log.warning("rien de transcrit, on retourne à l'écoute")
@@ -45,16 +45,21 @@ class Assistant:
     def run(self) -> None:
         self.warmup()
         log.info("Bleuet est à l'écoute. Ctrl+C pour arrêter.")
-        for block in stream_chunks(self.audio):
-            if self.detector.process_block(block) is None:
-                continue
-            try:
-                self.handle_utterance()
-            except Exception:  # une question ratée ne doit pas tuer la boucle
-                log.exception("échec du traitement de la question")
+        # Un seul flux micro pour toute la session : le wake word et
+        # l'enregistrement y puisent tour à tour (voir MicStream).
+        with MicStream(self.audio) as mic:
+            for block in mic.blocks():
+                if self.detector.process_block(block) is None:
+                    continue
                 try:
-                    self.speaker.speak("Désolé, je n'ai pas réussi à répondre.")
-                except Exception:
-                    log.exception("échec du message d'erreur vocal")
-            # Laisse retomber l'écho de notre propre réponse avant de réécouter.
-            time.sleep(0.3)
+                    self.handle_utterance(mic)
+                except Exception:  # une question ratée ne doit pas tuer la boucle
+                    log.exception("échec du traitement de la question")
+                    try:
+                        self.speaker.speak("Désolé, je n'ai pas réussi à répondre.")
+                    except Exception:
+                        log.exception("échec du message d'erreur vocal")
+                # Jette l'audio accumulé pendant qu'on parlait : sans annulation
+                # d'écho, l'assistant s'entend et se réveille tout seul.
+                time.sleep(0.3)
+                mic.flush()

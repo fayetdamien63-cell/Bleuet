@@ -1,5 +1,14 @@
 # 1. Challenge de l'architecture
 
+> [!NOTE]
+> **Document d'étude, conservé pour référence — il ne décrit pas le code du dépôt.**
+> Cette conception visait un satellite Go sur Raspberry Pi 1B+ relié à un serveur
+> par WebSocket. Elle a été écartée : le Pi 1B+ est trop juste (ARMv6, pas de NEON,
+> pas de Wi-Fi ni d'entrée audio) et un Pi 3 est déjà disponible. L'implémentation
+> retenue est le MVP Python décrit dans le [README](../README.md).
+> Ce qui en a été repris : le pre-roll audio, Open-Meteo, les règles de rédaction
+> orale, et les analyses de latence et de vie privée.
+
 > Ce document existe pour attaquer le projet avant que la réalité ne le fasse.
 > Chaque point liste : le problème, pourquoi il tue le projet, la parade retenue.
 
